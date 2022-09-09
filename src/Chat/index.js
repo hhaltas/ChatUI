@@ -45,12 +45,16 @@ var _textInput = null;
 var FlatListRef = null;
 
 const ChatIndex = props => {
+  const [userId, setuserId] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [chatMessage, setchatMessage] = useState(null);
   const [visibleMessage, setvisibleMessage] = useState(false);
   const [allMessages, setAllMessages] = useState([]);
   const [refreshing, setrefreshing] = useState(false);
   const [isAttachActive, setisAttachActive] = useState(false);
+  const [height, setheight] = useState(0);
+  const [time, setTime] = useState(0);
+  const [isShowBuyCredit, setisShowBuyCredit] = useState(true);
   useEffect(() => {
     if (shouldApplyNativeSettings()) {
       const reactTag = textInputReactTag();
@@ -176,6 +180,86 @@ const ChatIndex = props => {
       //await ws.current.send(JSON.stringify(sendData));
     }
   };
+
+  const isMessage = item => {
+    return item.senderId === userId;
+  };
+
+  const renderMessage = item => {
+    if (item.messageType === 'IMAGE') {
+      return (
+        <View
+          style={[
+            styles.containerMessage,
+            !isMessage(item) ? {marginRight: 10} : {marginLeft: 10},
+          ]}>
+          <View
+            style={[
+              styles.messageBox,
+              {
+                backgroundColor: !isMessage(item) ? codeChatMe : codeChatUser,
+                marginLeft: !isMessage(item) ? 100 : 0,
+                marginRight: !isMessage(item) ? 0 : 100,
+              },
+            ]}>
+            <Image
+              style={styles.messageImage}
+              source={{uri: item.message}}
+              resizeMode="contain"
+            />
+          </View>
+          <View
+            style={[
+              styles.talkBubbleTriangle,
+              !isMessage(item) ? {right: -5} : {left: -5},
+              {
+                transform: [{rotate: !isMessage(item) ? '180deg' : '0deg'}],
+                borderRightColor: !isMessage(item) ? codeChatMe : codeChatUser,
+              },
+            ]}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View
+        style={[
+          styles.containerMessage,
+          !isMessage(item) ? {marginRight: 10} : {marginLeft: 10},
+        ]}>
+        <View
+          style={[
+            styles.messageBox,
+            {
+              backgroundColor: !isMessage(item) ? codeChatMe : codeChatUser,
+              marginLeft: !isMessage(item) ? 100 : 0,
+              marginRight: !isMessage(item) ? 0 : 100,
+            },
+          ]}>
+          <Text
+            style={[
+              styles.messageText,
+              {
+                textAlign: !isMessage(item) ? 'right' : 'left',
+              },
+            ]}>
+            {item.message}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.talkBubbleTriangle,
+            !isMessage(item) ? {right: -5} : {left: -5},
+            {
+              transform: [{rotate: !isMessage(item) ? '180deg' : '0deg'}],
+              borderRightColor: !isMessage(item) ? codeChatMe : codeChatUser,
+            },
+          ]}
+        />
+      </View>
+    );
+  };
   const textInputView = () => {
     return (
       <View style={[styles.chatInputView]}>
@@ -239,6 +323,69 @@ const ChatIndex = props => {
     );
   };
 
+  const Header = () => {
+    return (
+      <View style={{width: '100%', flex: 1}}>
+        <View style={styles.banner}>
+          <View style={styles.Left}>
+            <View style={{flexDirection: 'row'}}>
+              <View style={styles.backBtn}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setOpenModal(!openModal);
+                  }}>
+                  <Image style={{width: 24, height: 24}} source={BackIcon2} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.bannerDetail}>
+                {/* <Image
+                  style={styles.Image}
+                  resizeMode="contain"
+                  source={{uri: setImageURL(props.teller.avatarUrl)}}
+                /> */}
+
+                <View style={{flexDirection: 'column'}}>
+                  <Text style={styles.tellerName}>Ahmet</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{color: codeChatDescription}}>dakikası</Text>
+
+                    <Text style={{}}>50 kredi</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View
+              style={{
+                height: 1,
+                backgroundColor: codeChatBackground,
+                width: '100%',
+              }}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                width: '100%',
+
+                margin: 10,
+              }}>
+              <View style={{flexDirection: 'row', width: '50%'}}>
+                <Text style={styles.time}>ASd </Text>
+                <Text style={styles.amount}>
+                  {('0' + Math.floor((time / 60000) % 60)).slice(-2)}:
+                  {('0' + Math.floor((time / 1000) % 60)).slice(-2)}{' '}
+                </Text>
+              </View>
+
+              <View style={{flexDirection: 'row', width: '50%'}}>
+                <Text style={styles.time}>kredi </Text>
+                <Text style={styles.amount}>350</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  };
   const ActionCamera = () => {
     return (
       <ActionSheet
@@ -273,6 +420,7 @@ const ChatIndex = props => {
       keyboardVerticalOffset={64}
       enabled>
       <View style={{flex: 1}}>
+        {Header()}
         <View
           style={{
             flex: 1,
